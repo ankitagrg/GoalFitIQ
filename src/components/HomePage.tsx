@@ -1,4 +1,4 @@
-import { ArrowRight, Dumbbell, Apple, Target, Clock } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 interface HomePageProps {
   onGetStarted: () => void;
