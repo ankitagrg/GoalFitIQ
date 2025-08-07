@@ -1,53 +1,57 @@
-const API_BASE_URL = import.meta.env.DEV ? 'http://localhost:3001/api' : '/api';
+import axios from 'axios';
+import type { UserProfile, WorkoutPlan, MealPlan } from '../types';
 
-export class APIClient {
-  private static async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
-    const url = `${API_BASE_URL}${endpoint}`;
-    
-    const config: RequestInit = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-      ...options,
-    };
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
-    try {
-      const response = await fetch(url, config);
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
-      }
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
-      return await response.json();
-    } catch (error) {
-      console.error('API request failed:', error);
-      throw error;
-    }
+export const generateWorkoutPlan = async (profile: UserProfile): Promise<WorkoutPlan> => {
+  try {
+    const response = await api.post('/generate-workout', profile);
+    return response.data;
+  } catch (error) {
+    console.error('Error generating workout plan:', error);
+    throw new Error('Failed to generate workout plan');
   }
+};
 
-  static async generateWorkoutPlan(profile: any) {
-    return this.request('/plans/workout', {
-      method: 'POST',
-      body: JSON.stringify({ profile }),
-    });
+export const generateMealPlan = async (profile: UserProfile): Promise<MealPlan> => {
+  try {
+    const response = await api.post('/generate-meal-plan', profile);
+    return response.data;
+  } catch (error) {
+    console.error('Error generating meal plan:', error);
+    throw new Error('Failed to generate meal plan');
   }
+};
 
-  static async generateMealPlan(profile: any) {
-    return this.request('/plans/meal', {
-      method: 'POST',
-      body: JSON.stringify({ profile }),
-    });
+export const customizeWorkoutPlan = async (
+  planId: string, 
+  customizations: Partial<UserProfile>
+): Promise<WorkoutPlan> => {
+  try {
+    const response = await api.post(`/customize-workout/${planId}`, customizations);
+    return response.data;
+  } catch (error) {
+    console.error('Error customizing workout plan:', error);
+    throw new Error('Failed to customize workout plan');
   }
+};
 
-  static async regeneratePlan(type: 'workout' | 'meal', profile: any, customizations?: any) {
-    return this.request(`/plans/${type}/regenerate`, {
-      method: 'POST',
-      body: JSON.stringify({ profile, customizations }),
-    });
+export const customizeMealPlan = async (
+  planId: string, 
+  customizations: Partial<UserProfile>
+): Promise<MealPlan> => {
+  try {
+    const response = await api.post(`/customize-meal-plan/${planId}`, customizations);
+    return response.data;
+  } catch (error) {
+    console.error('Error customizing meal plan:', error);
+    throw new Error('Failed to customize meal plan');
   }
-}
+};
