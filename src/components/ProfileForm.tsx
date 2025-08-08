@@ -1,155 +1,102 @@
-import { useState } from 'react';
-import { ChevronLeft, ChevronRight, User, Target, Dumbbell, Utensils } from 'lucide-react';
-import type { UserProfile } from '../types/index';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
+import type { UserProfile } from '../types';
 
-interface ProfileFormProps {
-  onSubmit: (profile: UserProfile) => void;
-  onBack: () => void;
-}
+const ProfileForm: React.FC = () => {
+  const navigate = useNavigate();
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 5;
 
-export function ProfileForm({ onSubmit, onBack }: ProfileFormProps) {
-  const [currentStep, setCurrentStep] = useState(0);
   const [profile, setProfile] = useState<UserProfile>({
     fitnessLevel: 'beginner',
-    fitnessGoal: 'weight_loss',
-    availableEquipment: [],
-    dietPreference: 'non_vegetarian',
-    workoutDuration: 45,
-    calorieGoal: 2000,
-    restrictions: []
+    fitnessGoal: 'weight-loss',
+    equipment: [],
+    dietPreference: 'non-vegetarian',
+    workoutDuration: '45',
   });
 
-  const steps = [
-    {
-      title: 'Fitness Level',
-      icon: <User className="w-6 h-6" />,
-      description: 'Tell us about your current fitness experience'
-    },
-    {
-      title: 'Goals',
-      icon: <Target className="w-6 h-6" />,
-      description: 'What do you want to achieve?'
-    },
-    {
-      title: 'Equipment',
-      icon: <Dumbbell className="w-6 h-6" />,
-      description: 'What equipment do you have access to?'
-    },
-    {
-      title: 'Diet & Duration',
-      icon: <Utensils className="w-6 h-6" />,
-      description: 'Your dietary preferences and workout time'
-    }
+  const equipmentOptions = [
+    'Bodyweight', 'Dumbbells', 'Resistance Bands', 'Kettlebells', 
+    'Barbell', 'Pull-up Bar', 'Yoga Mat', 'Treadmill'
   ];
 
-  const equipmentOptions = [
-    'Bodyweight',
-    'Dumbbells',
-    'Barbell',
-    'Resistance Bands',
-    'Kettlebells',
-    'Pull-up Bar',
-    'Gym Access',
-    'Yoga Mat',
-    'Stability Ball',
-    'TRX Straps'
-  ];
+  const handleEquipmentToggle = (equipment: string) => {
+    setProfile(prev => ({
+      ...prev,
+      equipment: prev.equipment.includes(equipment)
+        ? prev.equipment.filter(e => e !== equipment)
+        : [...prev.equipment, equipment]
+    }));
+  };
 
   const handleNext = () => {
-    if (currentStep < steps.length - 1) {
+    if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     } else {
-      onSubmit(profile);
+      localStorage.setItem('userProfile', JSON.stringify(profile));
+      navigate('/plans');
     }
   };
 
   const handlePrevious = () => {
-    if (currentStep > 0) {
+    if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
-    } else {
-      onBack();
     }
   };
 
-  const toggleEquipment = (equipment: string) => {
-    setProfile(prev => ({
-      ...prev,
-      availableEquipment: prev.availableEquipment.includes(equipment)
-        ? prev.availableEquipment.filter(e => e !== equipment)
-        : [...prev.availableEquipment, equipment]
-    }));
-  };
-
-  const renderStepContent = () => {
+  const renderStep = () => {
     switch (currentStep) {
-      case 0:
-        return (
-          <div className="space-y-4">
-            <h3 className="text-2xl font-semibold text-gray-900 mb-6">What's your fitness level?</h3>
-            {['beginner', 'intermediate', 'advanced'].map((level) => (
-              <button
-                key={level}
-                onClick={() => setProfile(prev => ({ ...prev, fitnessLevel: level as any }))}
-                className={`w-full p-6 rounded-xl border-2 text-left transition-all duration-200 ${
-                  profile.fitnessLevel === level
-                    ? 'border-blue-500 bg-blue-50 text-blue-900'
-                    : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                }`}
-              >
-                <div className="font-semibold text-lg capitalize">{level}</div>
-                <div className="text-sm mt-1 opacity-80">
-                  {level === 'beginner' && 'New to exercise or getting back into it'}
-                  {level === 'intermediate' && 'Regular exercise routine for 6+ months'}
-                  {level === 'advanced' && 'Consistent training for 2+ years'}
-                </div>
-              </button>
-            ))}
-          </div>
-        );
-
       case 1:
         return (
-          <div className="space-y-4">
-            <h3 className="text-2xl font-semibold text-gray-900 mb-6">What's your primary goal?</h3>
-            {[
-              { value: 'weight_loss', label: 'Weight Loss', desc: 'Burn fat and lose weight' },
-              { value: 'muscle_gain', label: 'Muscle Gain', desc: 'Build muscle and strength' },
-              { value: 'endurance', label: 'Endurance', desc: 'Improve cardiovascular fitness' },
-              { value: 'strength', label: 'Strength', desc: 'Increase overall strength' }
-            ].map((goal) => (
-              <button
-                key={goal.value}
-                onClick={() => setProfile(prev => ({ ...prev, fitnessGoal: goal.value as any }))}
-                className={`w-full p-6 rounded-xl border-2 text-left transition-all duration-200 ${
-                  profile.fitnessGoal === goal.value
-                    ? 'border-green-500 bg-green-50 text-green-900'
-                    : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                }`}
-              >
-                <div className="font-semibold text-lg">{goal.label}</div>
-                <div className="text-sm mt-1 opacity-80">{goal.desc}</div>
-              </button>
-            ))}
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900 text-center">What's your fitness level?</h2>
+            <div className="grid gap-4">
+              {[
+                { value: 'beginner', label: 'Beginner', description: 'New to fitness or returning after a long break' },
+                { value: 'intermediate', label: 'Intermediate', description: 'Regular exercise routine for 6+ months' },
+                { value: 'advanced', label: 'Advanced', description: 'Consistent training for 2+ years' }
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => setProfile(prev => ({ ...prev, fitnessLevel: option.value as any }))}
+                  className={`p-4 rounded-lg border-2 text-left transition-all ${
+                    profile.fitnessLevel === option.value
+                      ? 'border-purple-500 bg-purple-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="font-semibold text-gray-900">{option.label}</div>
+                  <div className="text-sm text-gray-600 mt-1">{option.description}</div>
+                </button>
+              ))}
+            </div>
           </div>
         );
 
       case 2:
         return (
-          <div className="space-y-4">
-            <h3 className="text-2xl font-semibold text-gray-900 mb-6">What equipment do you have?</h3>
-            <p className="text-gray-600 mb-6">Select all that apply (you can choose multiple)</p>
-            <div className="grid grid-cols-2 gap-3">
-              {equipmentOptions.map((equipment) => (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900 text-center">What's your primary goal?</h2>
+            <div className="grid gap-4">
+              {[
+                { value: 'weight-loss', label: 'Weight Loss', description: 'Burn fat and lose weight' },
+                { value: 'muscle-gain', label: 'Muscle Gain', description: 'Build muscle mass and strength' },
+                { value: 'endurance', label: 'Endurance', description: 'Improve cardiovascular fitness' },
+                { value: 'strength', label: 'Strength', description: 'Increase overall strength and power' }
+              ].map((option) => (
                 <button
-                  key={equipment}
-                  onClick={() => toggleEquipment(equipment)}
-                  className={`p-4 rounded-lg border-2 text-center transition-all duration-200 ${
-                    profile.availableEquipment.includes(equipment)
-                      ? 'border-purple-500 bg-purple-50 text-purple-900'
-                      : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                  key={option.value}
+                  onClick={() => setProfile(prev => ({ ...prev, fitnessGoal: option.value as any }))}
+                  className={`p-4 rounded-lg border-2 text-left transition-all ${
+                    profile.fitnessGoal === option.value
+                      ? 'border-purple-500 bg-purple-50'
+                      : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <div className="font-medium">{equipment}</div>
+                  <div className="font-semibold text-gray-900">{option.label}</div>
+                  <div className="text-sm text-gray-600 mt-1">{option.description}</div>
                 </button>
               ))}
             </div>
@@ -159,60 +106,77 @@ export function ProfileForm({ onSubmit, onBack }: ProfileFormProps) {
       case 3:
         return (
           <div className="space-y-6">
-            <div>
-              <h3 className="text-2xl font-semibold text-gray-900 mb-6">Final preferences</h3>
-              
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Diet Preference
-                </label>
-                <select
-                  value={profile.dietPreference}
-                  onChange={(e) => setProfile(prev => ({ ...prev, dietPreference: e.target.value as any }))}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            <h2 className="text-2xl font-bold text-gray-900 text-center">What equipment do you have?</h2>
+            <p className="text-gray-600 text-center">Select all that apply</p>
+            <div className="grid grid-cols-2 gap-3">
+              {equipmentOptions.map((equipment) => (
+                <button
+                  key={equipment}
+                  onClick={() => handleEquipmentToggle(equipment)}
+                  className={`p-3 rounded-lg border-2 text-center transition-all ${
+                    profile.equipment.includes(equipment)
+                      ? 'border-purple-500 bg-purple-50 text-purple-700'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
                 >
-                  <option value="non_vegetarian">Non-Vegetarian</option>
-                  <option value="vegetarian">Vegetarian</option>
-                  <option value="vegan">Vegan</option>
-                  <option value="keto">Keto</option>
-                  <option value="paleo">Paleo</option>
-                  <option value="mediterranean">Mediterranean</option>
-                </select>
-              </div>
+                  {equipment}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
 
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Workout Duration
-                </label>
-                <div className="grid grid-cols-3 gap-3">
-                  {[30, 45, 60].map((duration) => (
-                    <button
-                      key={duration}
-                      onClick={() => setProfile(prev => ({ ...prev, workoutDuration: duration as any }))}
-                      className={`p-3 rounded-lg border-2 text-center transition-all duration-200 ${
-                        profile.workoutDuration === duration
-                          ? 'border-orange-500 bg-orange-50 text-orange-900'
-                          : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                      }`}
-                    >
-                      {duration} min
-                    </button>
-                  ))}
-                </div>
-              </div>
+      case 4:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900 text-center">What's your diet preference?</h2>
+            <div className="grid gap-4">
+              {[
+                { value: 'non-vegetarian', label: 'Non-Vegetarian', description: 'Includes meat, fish, and poultry' },
+                { value: 'vegetarian', label: 'Vegetarian', description: 'No meat, but includes dairy and eggs' },
+                { value: 'vegan', label: 'Vegan', description: 'Plant-based diet only' },
+                { value: 'keto', label: 'Keto', description: 'Low-carb, high-fat diet' }
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => setProfile(prev => ({ ...prev, dietPreference: option.value as any }))}
+                  className={`p-4 rounded-lg border-2 text-left transition-all ${
+                    profile.dietPreference === option.value
+                      ? 'border-purple-500 bg-purple-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="font-semibold text-gray-900">{option.label}</div>
+                  <div className="text-sm text-gray-600 mt-1">{option.description}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Daily Calorie Goal (optional)
-                </label>
-                <input
-                  type="number"
-                  value={profile.calorieGoal || ''}
-                  onChange={(e) => setProfile(prev => ({ ...prev, calorieGoal: parseInt(e.target.value) || undefined }))}
-                  placeholder="2000"
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
+      case 5:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900 text-center">How long can you workout?</h2>
+            <div className="grid gap-4">
+              {[
+                { value: '30', label: '30 minutes', description: 'Quick and efficient workouts' },
+                { value: '45', label: '45 minutes', description: 'Balanced workout duration' },
+                { value: '60', label: '1 hour', description: 'Comprehensive training sessions' }
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => setProfile(prev => ({ ...prev, workoutDuration: option.value as any }))}
+                  className={`p-4 rounded-lg border-2 text-left transition-all ${
+                    profile.workoutDuration === option.value
+                      ? 'border-purple-500 bg-purple-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="font-semibold text-gray-900">{option.label}</div>
+                  <div className="text-sm text-gray-600 mt-1">{option.description}</div>
+                </button>
+              ))}
             </div>
           </div>
         );
@@ -223,65 +187,60 @@ export function ProfileForm({ onSubmit, onBack }: ProfileFormProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      <div className="max-w-2xl mx-auto px-4 py-8">
-        {/* Progress Steps */}
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 py-12">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Progress Bar */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            {steps.map((step, index) => (
-              <div
-                key={index}
-                className={`flex items-center space-x-2 ${
-                  index <= currentStep ? 'text-blue-600' : 'text-gray-400'
-                }`}
-              >
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-                    index <= currentStep
-                      ? 'border-blue-600 bg-blue-600 text-white'
-                      : 'border-gray-300 bg-white'
-                  }`}
-                >
-                  {step.icon}
-                </div>
-                <div className="hidden sm:block">
-                  <div className="font-medium">{step.title}</div>
-                  <div className="text-xs opacity-75">{step.description}</div>
-                </div>
-              </div>
-            ))}
+          <div className="flex justify-between text-sm font-medium text-gray-600 mb-2">
+            <span>Step {currentStep} of {totalSteps}</span>
+            <span>{Math.round((currentStep / totalSteps) * 100)}% Complete</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+          <div className="bg-gray-200 rounded-full h-2">
+            <div 
+              className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${(currentStep / totalSteps) * 100}%` }}
             />
           </div>
         </div>
 
-        {/* Form Content */}
-        <div className="bg-white rounded-2xl shadow-lg p-8">
-          {renderStepContent()}
+        {/* Form Step */}
+        <motion.div
+          key={currentStep}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.3 }}
+          className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100"
+        >
+          {renderStep()}
 
-          {/* Navigation Buttons */}
+          {/* Navigation */}
           <div className="flex justify-between mt-8">
             <button
               onClick={handlePrevious}
-              className="flex items-center space-x-2 px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+              disabled={currentStep === 1}
+              className={`flex items-center px-6 py-3 rounded-lg font-medium ${
+                currentStep === 1 
+                  ? 'text-gray-400 cursor-not-allowed' 
+                  : 'text-gray-700 hover:bg-gray-50'
+              }`}
             >
-              <ChevronLeft className="w-4 h-4" />
-              <span>Back</span>
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Previous
             </button>
+
             <button
               onClick={handleNext}
-              className="flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+              className="flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:shadow-lg transition-all duration-200"
             >
-              <span>{currentStep === steps.length - 1 ? 'Generate Plans' : 'Next'}</span>
-              <ChevronRight className="w-4 h-4" />
+              {currentStep === totalSteps ? 'Generate Plans' : 'Next'}
+              <ChevronRight className="h-4 w-4 ml-1" />
             </button>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
-}
+};
+
+export default ProfileForm;
