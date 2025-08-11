@@ -4,15 +4,12 @@ import { generateWorkoutPlan as generateAIWorkoutPlan } from '../services/aiServ
 
 const router = express.Router();
 
-// Log the routes being registered for debugging purposes
 console.log('Registering workout routes');
 
-// Generate workout plan
 router.post('/generate-workout', async (req, res) => {
   try {
     const profile = req.body;
     
-    // Validate required fields
     if (!profile.fitnessLevel || !profile.fitnessGoal || !profile.workoutDuration) {
       return res.status(400).json({ 
         error: 'Missing required fields: fitnessLevel, fitnessGoal, workoutDuration' 
@@ -20,8 +17,7 @@ router.post('/generate-workout', async (req, res) => {
     }
 
     const workoutPlan = await generateAIWorkoutPlan(profile);
-    
-    // Add metadata
+  
     const enrichedPlan = {
       id: uuidv4(),
       ...workoutPlan,
