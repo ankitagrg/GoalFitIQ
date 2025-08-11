@@ -1,90 +1,61 @@
 export interface UserProfile {
-    fitnessLevel: 'beginner' | 'intermediate' | 'advanced';
-    fitnessGoal: 'weight_loss' | 'muscle_gain' | 'endurance' | 'strength';
-    availableEquipment: string[];
-    dietPreference: 'vegetarian' | 'non_vegetarian' | 'vegan' | 'keto' | 'paleo' | 'mediterranean';
-    workoutDuration: 30 | 45 | 60;
-    calorieGoal?: number;
-    restrictions?: string[];
-  }
-  
-  export interface Exercise {
-    name: string;
-    sets: number;
-    reps: string;
-    restTime: string;
-    description: string;
-    targetMuscles: string[];
-    difficulty: string;
-    modifications?: {
-      easier?: string;
-      harder?: string;
-    };
-  }
-  
-  export interface WorkoutDay {
-    day: string;
-    focus: string;
-    exercises: Exercise[];
-    totalDuration: number;
-    warmup: string[];
-    cooldown: string[];
-  }
-  
-  export interface WorkoutPlan {
-    id: string;
-    name: string;
-    description: string;
-    duration: string;
-    difficulty: string;
-    days: WorkoutDay[];
-    tips: string[];
-    createdAt: Date;
-  }
-  
-  export interface Meal {
-    name: string;
-    ingredients: string[];
-    instructions: string[];
-    nutrition: {
-      calories: number;
-      protein: number;
-      carbs: number;
-      fat: number;
-      fiber: number;
-    };
-    prepTime: number;
-    cookTime: number;
-    servings: number;
-  }
-  
-  export interface DayMeals {
-    day: string;
-    breakfast: Meal;
-    lunch: Meal;
-    dinner: Meal;
-    snacks: Meal[];
-    totalNutrition: {
-      calories: number;
-      protein: number;
-      carbs: number;
-      fat: number;
-      fiber: number;
-    };
-  }
-  
-  export interface MealPlan {
-    id: string;
-    name: string;
-    description: string;
-    days: DayMeals[];
-    shoppingList: string[];
-    tips: string[];
-    createdAt: Date;
-  }
-  
-  export interface APIResponse<T> {
-    success: boolean;
-    data?: T;
-    error?: string;
-  }
+  fitnessLevel: 'beginner' | 'intermediate' | 'advanced';
+  fitnessGoal: 'weight-loss' | 'muscle-gain' | 'endurance' | 'strength';
+  equipment: string[];
+  dietPreference: 'vegetarian' | 'non-vegetarian' | 'vegan' | 'keto';
+  workoutDuration: '30' | '45' | '60';
+  calorieIntake?: number;
+}
+
+export interface Exercise {
+  name: string;
+  sets: number;
+  reps: string;
+  restTime: string;
+  description: string;
+  modifications?: string;
+}
+
+export interface WorkoutDay {
+  day: string;
+  focus: string;
+  exercises: Exercise[];
+}
+
+export interface WorkoutPlan {
+  id: string;
+  title: string;
+  duration: string;
+  level: string;
+  days: WorkoutDay[];
+  createdAt: string;
+}
+
+export interface Meal {
+  name: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  recipe?: string;
+}
+
+export interface MealDay {
+  day: string;
+  breakfast: Meal;
+  lunch: Meal;
+  dinner: Meal;
+  snack1: Meal;
+  snack2: Meal;
+  totalCalories: number;
+}
+
+export interface MealPlan {
+  id: string;
+  title: string;
+  dietType: string;
+  dailyCalories: number;
+  days: MealDay[];
+  shoppingList?: string[];
+  createdAt: string;
+}
